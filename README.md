@@ -14,19 +14,24 @@ Anschließend `http://localhost:8000` im Browser öffnen. Das direkte Öffnen vo
 
 ## Spielen
 
-Mit einem Klick auf den Boden oder mit WASD beziehungsweise den Pfeiltasten bewegen. Die farbigen Personen anklicken, ihre Gespräche beenden und die Rollen im Notizbuch nachlesen. Nach drei abgeschlossenen Gesprächen schaltet die Projektleitung das Quiz frei. Der Fortschritt gilt für die aktuelle Sitzung und wird beim Neuladen zurückgesetzt. Gehälter sind illustrative Brutto-Jahreswerte und variieren beispielsweise nach Region und Erfahrung.
+Mit einem Klick auf den Boden oder mit WASD beziehungsweise den Pfeiltasten bewegen. Ein Klick auf eine Person lässt die Spielfigur zu ihr laufen; manuelle Bewegung oder ein Bodenklick bricht den Weg ab. Ein Bodenring markiert die Person unter dem Mauszeiger. Beim Gesprächsbeginn blickt sie zur Spielfigur. Dialogtexte erscheinen Zeichen für Zeichen: Ein Klick auf die Antwort- oder Weiter-Schaltfläche zeigt den Text sofort vollständig, der nächste setzt das Gespräch fort. Rollen nach abgeschlossenen Gesprächen im Notizbuch nachlesen; nach drei Gesprächen schaltet die Projektleitung das Quiz frei. Der Fortschritt gilt für die aktuelle Sitzung und wird beim Neuladen zurückgesetzt. Gehälter sind illustrative Brutto-Jahreswerte und variieren beispielsweise nach Region und Erfahrung.
+
+Die Schritt-, Sprach- und Erfolgstöne werden lokal mit der Web Audio API erzeugt und nach der ersten Interaktion aktiviert. Über „Ton an/aus“ im HUD lassen sie sich stummschalten. Die Stimmlage der Personen kann über `voicePitch` in den Spieldaten angepasst werden.
 
 ## Aufbau
 
 - `data/officeData.json`: Rollen, Gespräche und Quizfragen.
 - `js/gameScene.js`: Darstellung und Steuerung des Büros.
 - `js/uiManager.js`: Dialoge, Notizbuch, Fortschritt und Quiz.
+- `js/soundManager.js`: prozedurale Soundeffekte und Stummschaltung.
 - `js/main.js`: Laden der Daten und Start des Spiels.
 - `css/style.css` und `index.html`: HTML-Oberfläche und Gestaltung.
 - `assets/phaser.min.js`: lokal eingebundenes Phaser 3.90.0; Lizenz in `assets/PHASER-LICENSE.txt`.
 
 ## Eigene Grafiken
 
-PNG-Dateien können unter `assets/images/` abgelegt werden: `floor_tile.png`, `desk.png`, `player.png`, `npc_junior_dev.png`, `npc_devops.png`, `npc_security.png` und `boss.png`. Die Dateinamen der Personen lassen sich über das optionale `sprite`-Feld in den Spieldaten ändern. Fehlende Bilder werden einzeln durch die bisherigen Rechtecke ersetzt; beim Laden können dafür 404-Meldungen in der Browserkonsole erscheinen.
+PNG-Dateien können unter `assets/images/` abgelegt werden: `floor_office.png`, `desk_dual.png`, `desk_boss.png`, `chair.png`, `plant.png`, `coffee_bar.png`, `sofa.png`, `whiteboard.png`, `player.png`, `npc_alex.png`, `npc_sam.png`, `npc_mika.png` und `boss_kim.png`. Die Dateinamen der Personen lassen sich über das optionale `sprite`-Feld in den Spieldaten ändern. Fehlende Büro- und Möbelgrafiken werden prozedural erzeugt; für fehlende Personengrafiken erscheinen Rechtecke. Beim Laden können für fehlende Bilder 404-Meldungen in der Browserkonsole erscheinen.
 
-Der Boden wird gekachelt und Personen werden auf 42 × 52 Pixel skaliert. `player.png` muss ein Standard-LPC-Sprite-Sheet mit 64 × 64 Pixeln pro Frame und 13 Spalten sein; die Spielfigur wird mit 64 × 64 Pixeln dargestellt und verwendet die LPC-Laufanimationen. Schreibtische werden über das optionale `furniture`-Array platziert und haben standardmäßig 120 × 45 Pixel; `width` und `height` ändern ihre Anzeige- und Kollisionsgröße. Sie blockieren die Spielfigur auch dann, wenn noch keine Schreibtischgrafik vorhanden ist. Fehlt das Array, bleibt die bisherige Büroeinrichtung erhalten.
+`floor_office.png` wird auf 800 × 600 Pixel skaliert; alternativ wird das ältere `floor_tile.png` gekachelt, sofern keine `floor_office.png` vorhanden ist. Alle Personengrafiken müssen Standard-LPC-Sprite-Sheets mit 64 × 64 Pixeln pro Frame und 13 Spalten sein und werden mit 64 × 64 Pixeln dargestellt. Die Spielfigur verwendet die LPC-Laufanimationen; für NPCs und Projektleitung legt das optionale Feld `facing` die anfängliche Blickrichtung (`up`, `left`, `down` oder `right`) fest, standardmäßig `down`.
+
+Das `furniture`-Array platziert Möbel anhand von `type`, `x` und `y`. `solid: true` blockiert die Spielfigur an der unteren Hälfte des Möbelbildes, `solid: false` macht es durchlässig. Die optionalen Felder `width` und `height` ändern Anzeige- und Kollisionsgröße. Figuren und Möbel werden nach ihrer Y-Position sortiert. Der ältere Typ `desk` und `desk.png` bleiben verwendbar; bei `desk` ist `solid` standardmäßig `true`. Fehlt das Array, bleibt die bisherige Büroeinrichtung erhalten.

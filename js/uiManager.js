@@ -1,17 +1,26 @@
+import { soundManager } from "./soundManager.js";
+
 export class UIManager {
   constructor(data) {
     this.data = data;
     this.unlockedRoles = new Set();
     this.activeNpc = null;
     this.dialogueIndex = 0;
+    this.typewriterTimer = null;
     this.quizIndex = 0;
     this.quizScore = 0;
     this.dialogue = document.getElementById("dialogue-overlay");
     this.notebook = document.getElementById("notebook-overlay");
     this.quiz = document.getElementById("quiz-overlay");
     this.notebookButton = document.getElementById("notebook-button");
+    this.soundButton = document.getElementById("sound-toggle");
     this.status = document.getElementById("game-status");
     this.notebookButton.addEventListener("click", () => this.toggleNotebook());
+    this.soundButton.addEventListener("click", () => {
+      const muted = soundManager.toggleMute();
+      this.soundButton.textContent = muted ? "🔇 Ton aus" : "🔊 Ton an";
+      this.soundButton.setAttribute("aria-pressed", String(!muted));
+    });
     document.getElementById("notebook-close").addEventListener("click", () => this.toggleNotebook(false));
     document.getElementById("quiz-close").addEventListener("click", () => this.closeQuiz());
     document.addEventListener("keydown", (event) => {
@@ -43,15 +52,43 @@ export class UIManager {
   renderDialogue() {
     const step = this.activeNpc.dialogue[this.dialogueIndex];
     document.getElementById("dialogue-speaker").textContent = step.speaker;
-    document.getElementById("dialogue-text").textContent = step.text;
+    const text = document.getElementById("dialogue-text");
+    const characters = Array.from(step.text);
+    text.textContent = "";
+    document.getElementById("dialogue-announcement").textContent = `${step.speaker}: ${step.text}`;
+    clearInterval(this.typewriterTimer);
+    this.typewriterTimer = null;
+    let index = 0;
+    let visibleCharacters = 0;
+    if (characters.length) {
+      this.typewriterTimer = setInterval(() => {
+        const character = characters[index++];
+        text.textContent += character;
+        if (!/\s/u.test(character) && ++visibleCharacters % 2 === 0) {
+          soundManager.playVoiceBlip(this.activeNpc.voicePitch);
+        }
+        if (index === characters.length) {
+          clearInterval(this.typewriterTimer);
+          this.typewriterTimer = null;
+        }
+      }, 28);
+    }
     const actions = document.getElementById("dialogue-actions");
     actions.replaceChildren();
     const advance = () => {
+      if (this.typewriterTimer !== null) {
+        clearInterval(this.typewriterTimer);
+        this.typewriterTimer = null;
+        text.textContent = step.text;
+        return;
+      }
       this.dialogueIndex += 1;
       if (this.dialogueIndex < this.activeNpc.dialogue.length) {
         this.renderDialogue();
       } else {
+        const isNewRole = !this.unlockedRoles.has(this.activeNpc.id);
         this.unlockedRoles.add(this.activeNpc.id);
+        if (isNewRole) soundManager.playCollect();
         this.updateNotebookButton();
         this.showStatus(`${this.activeNpc.roleTitle} wurde im Notizbuch freigeschaltet.`);
         this.activeNpc = null;

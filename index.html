@@ -18,13 +18,17 @@
       <div id="game-canvas"></div>
       <div class="hud">
         <span class="hud-hint">Klicken oder WASD / Pfeiltasten</span>
-        <button id="notebook-button" type="button" aria-controls="notebook-overlay" aria-expanded="false">Notizbuch (0/3)</button>
+        <div class="hud-actions">
+          <button id="sound-toggle" class="button-secondary" type="button" aria-pressed="true">🔊 Ton an</button>
+          <button id="notebook-button" type="button" aria-controls="notebook-overlay" aria-expanded="false">Notizbuch (0/3)</button>
+        </div>
       </div>
       <p id="game-status" class="game-status" role="status" aria-live="polite"></p>
 
-      <section id="dialogue-overlay" class="panel dialogue" aria-label="Gespräch" aria-live="polite" hidden>
+      <section id="dialogue-overlay" class="panel dialogue" aria-label="Gespräch" hidden>
         <p id="dialogue-speaker" class="eyebrow"></p>
-        <p id="dialogue-text"></p>
+        <p id="dialogue-text" aria-hidden="true"></p>
+        <p id="dialogue-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></p>
         <div id="dialogue-actions" class="actions"></div>
       </section>
 
