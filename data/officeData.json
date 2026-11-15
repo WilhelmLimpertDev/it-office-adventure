@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "title": "IT-Karriere-Kompass",
+    "welcomeText": "Willkommen im IT-Büro! Entdecke drei Berufsbilder und löse anschließend die Praxisfälle der Projektleitung."
+  },
+  "npcs": [
+    {
+      "id": "junior_dev",
+      "sprite": "npc_junior_dev",
+      "name": "Alex",
+      "roleTitle": "Junior Softwareentwickler:in",
+      "department": "Softwareentwicklung",
+      "x": 180,
+      "y": 260,
+      "color": "#38bdf8",
+      "cardData": {
+        "tasks": ["Funktionen nach Anforderungen implementieren", "Code testen und Fehler beheben", "Im Team Code-Reviews durchführen"],
+        "experience": "Einstieg nach Ausbildung, Studium oder vergleichbarer praktischer Qualifikation; erste Projekterfahrung ist hilfreich.",
+        "techStack": ["JavaScript", "Git", "HTML & CSS", "Tests"],
+        "salaryRange": "ca. 38.000–50.000 € brutto/Jahr"
+      },
+      "dialogue": [
+        { "speaker": "Alex", "text": "Hi! Ich entwickle neue Funktionen und behebe Fehler in unserer Anwendung." },
+        { "speaker": "Alex", "text": "Was möchtest du über meinen Alltag wissen?", "choices": ["Wie arbeitest du im Team?", "Welche Werkzeuge nutzt du?"] },
+        { "speaker": "Alex", "text": "Wir planen gemeinsam, nutzen Git und prüfen unseren Code gegenseitig. Automatisierte Tests helfen uns, Änderungen sicher auszuliefern." }
+      ]
+    },
+    {
+      "id": "devops",
+      "sprite": "npc_devops",
+      "name": "Sam",
+      "roleTitle": "DevOps Engineer",
+      "department": "Plattform & Betrieb",
+      "x": 405,
+      "y": 220,
+      "color": "#a78bfa",
+      "cardData": {
+        "tasks": ["Deployments mit CI/CD automatisieren", "Systeme überwachen und stabil betreiben", "Infrastruktur skalierbar bereitstellen"],
+        "experience": "Häufig Ausbildung oder Studium und praktische Erfahrung in Entwicklung, Systemadministration oder Cloud-Betrieb.",
+        "techStack": ["Linux", "Docker", "CI/CD", "Cloud"],
+        "salaryRange": "ca. 50.000–75.000 € brutto/Jahr"
+      },
+      "dialogue": [
+        { "speaker": "Sam", "text": "Hallo! Ich verbinde Entwicklung und Betrieb, damit unsere Software zuverlässig läuft." },
+        { "speaker": "Sam", "text": "Wenn viele Menschen gleichzeitig zugreifen, helfen Monitoring und skalierbare Infrastruktur. Deployments automatisieren wir mit CI/CD." }
+      ]
+    },
+    {
+      "id": "it_security",
+      "sprite": "npc_security",
+      "name": "Mika",
+      "roleTitle": "IT-Security-Spezialist:in",
+      "department": "Informationssicherheit",
+      "x": 610,
+      "y": 350,
+      "color": "#4ade80",
+      "cardData": {
+        "tasks": ["Sicherheitsrisiken analysieren", "Schwachstellen identifizieren und beheben", "Sicherheitsvorfälle untersuchen"],
+        "experience": "Ausbildung, Studium oder vergleichbare Praxis in IT; Kenntnisse zu Netzwerken und Sicherheit sind wichtig.",
+        "techStack": ["Netzwerke", "Linux", "SIEM", "Schwachstellenscanner"],
+        "salaryRange": "ca. 48.000–75.000 € brutto/Jahr"
+      },
+      "dialogue": [
+        { "speaker": "Mika", "text": "Schön, dass du da bist! Ich helfe unserem Team, Systeme und Daten zu schützen." },
+        { "speaker": "Mika", "text": "Dazu untersuche ich verdächtige Ereignisse, bewerte Schwachstellen und bespreche Gegenmaßnahmen mit den anderen Teams." }
+      ]
+    }
+  ],
+  "furniture": [
+    { "type": "desk", "x": 180, "y": 175 },
+    { "type": "desk", "x": 405, "y": 130 },
+    { "type": "desk", "x": 610, "y": 265 },
+    { "type": "desk", "x": 700, "y": 160, "width": 125, "height": 35 }
+  ],
+  "bossQuiz": {
+    "id": "boss",
+    "sprite": "boss",
+    "name": "Kim",
+    "roleTitle": "HR- & Projektleitung",
+    "x": 700,
+    "y": 100,
+    "introText": "Hallo! Du hast das Team kennengelernt. Welche Rolle passt zu welchem Praxisfall?",
+    "minUnlockedRoles": 3,
+    "questions": [
+      {
+        "question": "Bei Lastspitzen fällt ein Server regelmäßig aus. Wer hilft beim Skalieren und Überwachen der Infrastruktur?",
+        "options": ["Junior Softwareentwicklung", "DevOps", "IT-Security"],
+        "correctIndex": 1,
+        "explanation": "DevOps unterstützt beim zuverlässigen Betrieb, bei Monitoring und beim Skalieren der Infrastruktur."
+      },
+      {
+        "question": "Eine neue Funktion soll in der Anwendung umgesetzt und durch Tests abgesichert werden. Welche Rolle passt besonders gut?",
+        "options": ["IT-Security", "DevOps", "Junior Softwareentwicklung"],
+        "correctIndex": 2,
+        "explanation": "Die Softwareentwicklung implementiert und testet Funktionen anhand der Anforderungen."
+      },
+      {
+        "question": "Ein verdächtiger Zugriff auf sensible Daten wurde entdeckt. Wer untersucht das Sicherheitsereignis?",
+        "options": ["IT-Security", "Junior Softwareentwicklung", "DevOps"],
+        "correctIndex": 0,
+        "explanation": "IT-Security untersucht Sicherheitsvorfälle und empfiehlt geeignete Schutzmaßnahmen."
+      }
+    ]
+  }
+}

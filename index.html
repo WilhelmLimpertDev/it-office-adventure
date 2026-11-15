@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IT-Karriere-Kompass</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <p class="eyebrow">IT-Office-Adventure</p>
+      <h1 id="game-title">IT-Karriere-Kompass</h1>
+      <p id="welcome-text">Das Büro wird vorbereitet ...</p>
+    </header>
+
+    <section id="game-container" aria-label="Interaktives IT-Büro">
+      <div id="game-canvas"></div>
+      <div class="hud">
+        <span class="hud-hint">Klicken oder WASD / Pfeiltasten</span>
+        <button id="notebook-button" type="button" aria-controls="notebook-overlay" aria-expanded="false">Notizbuch (0/3)</button>
+      </div>
+      <p id="game-status" class="game-status" role="status" aria-live="polite"></p>
+
+      <section id="dialogue-overlay" class="panel dialogue" aria-label="Gespräch" aria-live="polite" hidden>
+        <p id="dialogue-speaker" class="eyebrow"></p>
+        <p id="dialogue-text"></p>
+        <div id="dialogue-actions" class="actions"></div>
+      </section>
+
+      <section id="notebook-overlay" class="modal" role="dialog" aria-modal="true" aria-labelledby="notebook-title" hidden>
+        <div class="panel modal-content">
+          <div class="modal-header">
+            <div><p class="eyebrow">Deine Entdeckungen</p><h2 id="notebook-title">Notizbuch</h2></div>
+            <button id="notebook-close" class="button-secondary" type="button">Schließen</button>
+          </div>
+          <div id="notebook-cards" class="cards"></div>
+        </div>
+      </section>
+
+      <section id="quiz-overlay" class="modal" role="dialog" aria-modal="true" aria-labelledby="quiz-title" hidden>
+        <div class="panel modal-content quiz-content">
+          <div class="modal-header">
+            <div><p class="eyebrow">Abschlussrunde</p><h2 id="quiz-title">Das Praxis-Quiz</h2></div>
+            <button id="quiz-close" class="button-secondary" type="button">Schließen</button>
+          </div>
+          <div id="quiz-body" aria-live="polite"></div>
+        </div>
+      </section>
+    </section>
+    <p class="help">Sprich mit den Kolleginnen und Kollegen und sammle ihre Rollen im Notizbuch. Danach wartet die Abschlussrunde auf dich.</p>
+    <noscript>Für dieses Spiel muss JavaScript aktiviert sein.</noscript>
+  </main>
+  <script src="./assets/phaser.min.js"></script>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
