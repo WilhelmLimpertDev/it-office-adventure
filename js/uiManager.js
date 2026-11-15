@@ -6,6 +6,9 @@ export class UIManager {
   constructor(data) {
     this.data = data;
     this.isGameStarted = false;
+    this.isPaused = false;
+    this.hasStartedBefore = false;
+    this.startScreenTimer = null;
     this.unlockedRoles = new Set();
     this.quizCompleted = false;
     this.lastQuizScore = 0;
@@ -23,12 +26,18 @@ export class UIManager {
     this.soundButton = document.getElementById("sound-toggle");
     this.status = document.getElementById("game-status");
     this.startScreen = document.getElementById("start-screen");
+    this.pauseScreen = document.getElementById("pause-screen");
+    this.pauseSoundButton = document.getElementById("pause-sound-btn");
     this.startButton = document.getElementById("start-game-btn");
     this.continueButton = document.getElementById("continue-game-btn");
     this.startStatus = document.getElementById("start-status");
     this.quizStorageStatus = document.getElementById("quiz-storage-status");
     this.quizBody = document.getElementById("quiz-body");
     this.quizResult = document.getElementById("quiz-result-screen");
+    this.elevatorControls = document.getElementById("elevator-controls");
+    this.buildingNotice = document.getElementById("building-notice");
+    this.returnToBuildingButton = document.getElementById("return-to-building-btn");
+    this.currentScene = "building";
     document.getElementById("start-title").textContent = data.meta.title;
     document.getElementById("start-subtitle").textContent = data.meta.subtitle;
     document.getElementById("start-mission").textContent = data.meta.missionText;
@@ -39,10 +48,18 @@ export class UIManager {
     });
     this.continueButton.addEventListener("click", () => this.startGame());
     this.notebookButton.addEventListener("click", () => this.toggleNotebook());
-    this.soundButton.addEventListener("click", () => {
-      const muted = soundManager.toggleMute();
-      this.soundButton.textContent = muted ? "🔇 Ton aus" : "🔊 Ton an";
-      this.soundButton.setAttribute("aria-pressed", String(!muted));
+    this.soundButton.addEventListener("click", () => this.toggleSound());
+    this.pauseSoundButton.addEventListener("click", () => this.toggleSound());
+    document.getElementById("resume-game-btn").addEventListener("click", () => this.togglePause(false));
+    document.getElementById("quit-to-menu-btn").addEventListener("click", () => this.returnToMenu());
+    this.returnToBuildingButton.addEventListener("click", () => this.returnToBuilding());
+    this.elevatorControls.querySelectorAll("button[data-floor]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!this.isBlockingGame && this.currentScene === "building") {
+          this.requestFloor(button.dataset.floor);
+          document.getElementById("game-canvas").focus({ preventScroll: true });
+        }
+      });
     });
     document.getElementById("notebook-close").addEventListener("click", () => this.toggleNotebook(false));
     document.getElementById("quiz-close").addEventListener("click", () => this.closeQuiz());
@@ -56,10 +73,12 @@ export class UIManager {
     });
     document.getElementById("quiz-return").addEventListener("click", () => this.closeQuiz());
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        if (!this.notebook.hidden) this.toggleNotebook(false);
-        else if (!this.quiz.hidden) this.closeQuiz();
-      }
+      if (event.key !== "Escape" || event.repeat || !this.isGameStarted || !this.startScreen.hidden) return;
+      event.preventDefault();
+      if (!this.dialogue.hidden) this.closeDialogue();
+      else if (!this.notebook.hidden) this.toggleNotebook(false);
+      else if (!this.quiz.hidden) this.closeQuiz();
+      else this.togglePause();
     });
     this.loadProgress();
   }
@@ -139,7 +158,94 @@ export class UIManager {
   }
 
   get isBlockingGame() {
-    return !this.isGameStarted || !this.dialogue.hidden || !this.notebook.hidden || !this.quiz.hidden;
+    return !this.isGameStarted || this.isPaused || !this.dialogue.hidden || !this.notebook.hidden || !this.quiz.hidden;
+  }
+
+  setCurrentScene(scene) {
+    this.currentScene = scene;
+    const building = scene === "building";
+    document.getElementById("game-container").classList.toggle("building", building);
+    this.notebookButton.hidden = building;
+    this.elevatorControls.hidden = !building;
+    this.elevatorControls.inert = !this.isGameStarted || this.isPaused;
+    this.returnToBuildingButton.hidden = building;
+    document.getElementById("hud-hint").textContent = building
+      ? "A/D oder klicken · Enter an Türen"
+      : "Klicken oder WASD / Pfeiltasten";
+    this.showStatus(this.storageWarning);
+    this.hideBuildingNotice();
+  }
+
+  setElevatorState(floor, busy) {
+    this.elevatorControls.setAttribute("aria-busy", String(busy));
+    this.elevatorControls.querySelectorAll("button[data-floor]").forEach((button) => {
+      button.disabled = busy;
+      button.setAttribute("aria-pressed", String(button.dataset.floor === floor));
+    });
+  }
+
+  showBuildingNotice(message) {
+    this.buildingNotice.textContent = message;
+    this.buildingNotice.hidden = false;
+  }
+
+  hideBuildingNotice() {
+    this.buildingNotice.hidden = true;
+    this.buildingNotice.textContent = "";
+  }
+
+  toggleSound() {
+    const muted = soundManager.toggleMute();
+    [this.soundButton, this.pauseSoundButton].forEach((button) => {
+      button.textContent = muted ? "🔇 Ton aus" : "🔊 Ton an";
+      button.setAttribute("aria-pressed", String(!muted));
+    });
+  }
+
+  togglePause(paused = !this.isPaused) {
+    if (!this.isGameStarted || !this.startScreen.hidden ||
+        !this.dialogue.hidden || !this.notebook.hidden || !this.quiz.hidden) return;
+    this.isPaused = paused;
+    if (paused) this.stopMovement();
+    this.pauseScreen.hidden = !paused;
+    this.pauseScreen.classList.toggle("hidden", !paused);
+    const canvas = document.getElementById("game-canvas");
+    canvas.inert = paused;
+    document.querySelector(".hud").inert = paused;
+    this.elevatorControls.inert = paused;
+    if (paused) document.getElementById("resume-game-btn").focus({ preventScroll: true });
+    else {
+      this.resumeMovement();
+      canvas.focus({ preventScroll: true });
+    }
+  }
+
+  returnToBuilding() {
+    if (!this.isPaused || this.currentScene !== "office") return;
+    this.isPaused = false;
+    this.pauseScreen.hidden = true;
+    this.pauseScreen.classList.add("hidden");
+    const canvas = document.getElementById("game-canvas");
+    canvas.inert = false;
+    document.querySelector(".hud").inert = false;
+    this.openBuilding("E1");
+    canvas.focus({ preventScroll: true });
+  }
+
+  returnToMenu() {
+    if (!this.isPaused) return;
+    this.isPaused = false;
+    this.isGameStarted = false;
+    this.pauseScreen.hidden = true;
+    this.pauseScreen.classList.add("hidden");
+    clearTimeout(this.startScreenTimer);
+    this.startScreen.hidden = false;
+    this.startScreen.inert = false;
+    this.startScreen.removeAttribute("aria-hidden");
+    this.startScreen.classList.remove("hidden");
+    this.startScreen.querySelector(".start-card").classList.remove("hidden");
+    this.updateStartMenu();
+    this.enableStart();
   }
 
   enableStart() {
@@ -152,18 +258,22 @@ export class UIManager {
 
   startGame() {
     if (this.isGameStarted || this.startButton.disabled) return;
+    if (this.hasStartedBefore) this.openBuilding("EG");
     this.isGameStarted = true;
-    if (this.storageWarning) this.showStatus(this.storageWarning);
+    this.hasStartedBefore = true;
+    this.showStatus(this.storageWarning);
     soundManager.unlock().then(() => soundManager.playCollect());
     const canvas = document.getElementById("game-canvas");
     canvas.inert = false;
     document.querySelector(".hud").inert = false;
+    this.elevatorControls.inert = false;
     canvas.focus({ preventScroll: true });
     this.startScreen.inert = true;
     this.startScreen.setAttribute("aria-hidden", "true");
     this.startScreen.classList.add("hidden");
     this.startScreen.querySelector(".start-card").classList.add("hidden");
-    setTimeout(() => { this.startScreen.hidden = true; }, 300);
+    clearTimeout(this.startScreenTimer);
+    this.startScreenTimer = setTimeout(() => { this.startScreen.hidden = true; }, 300);
   }
 
   showStatus(message) {
@@ -177,6 +287,14 @@ export class UIManager {
     this.dialogueIndex = 0;
     this.dialogue.hidden = false;
     this.renderDialogue();
+  }
+
+  closeDialogue() {
+    clearInterval(this.typewriterTimer);
+    this.typewriterTimer = null;
+    this.activeNpc = null;
+    this.dialogue.hidden = true;
+    document.getElementById("game-canvas").focus({ preventScroll: true });
   }
 
   renderDialogue() {
@@ -222,8 +340,7 @@ export class UIManager {
         this.updateNotebookButton();
         this.showStatus(`${this.activeNpc.roleTitle} wurde im Notizbuch freigeschaltet.`);
         if (isNewRole) this.saveProgress();
-        this.activeNpc = null;
-        this.dialogue.hidden = true;
+        this.closeDialogue();
       }
     };
     if (step.choices && step.choices.length) {
@@ -239,7 +356,7 @@ export class UIManager {
   }
 
   toggleNotebook(open = this.notebook.hidden) {
-    if (open && (!this.isGameStarted || !this.dialogue.hidden || !this.quiz.hidden)) return;
+    if (open && (!this.isGameStarted || this.isPaused || !this.dialogue.hidden || !this.quiz.hidden)) return;
     this.notebook.hidden = !open;
     this.notebookButton.setAttribute("aria-expanded", String(open));
     if (open) {

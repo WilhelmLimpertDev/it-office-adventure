@@ -14,15 +14,22 @@
       <p id="welcome-text">Das Büro wird vorbereitet ...</p>
     </header>
 
-    <section id="game-container" aria-label="Interaktives IT-Büro">
+    <section id="game-container" aria-label="Interaktives Firmengebäude und IT-Büro">
       <div id="game-canvas" tabindex="-1" inert></div>
       <div class="hud" inert>
-        <span class="hud-hint">Klicken oder WASD / Pfeiltasten</span>
+        <span class="hud-hint" id="hud-hint">Klicken oder WASD / Pfeiltasten</span>
         <div class="hud-actions">
           <button id="sound-toggle" class="button-secondary" type="button" aria-pressed="true">🔊 Ton an</button>
           <button id="notebook-button" type="button" aria-controls="notebook-overlay" aria-expanded="false">Notizbuch (0/3)</button>
         </div>
       </div>
+      <nav id="elevator-controls" aria-label="Fahrstuhlsteuerung" hidden inert>
+        <span>Aufzug</span>
+        <button type="button" data-floor="E2" aria-label="Etage 2">E2</button>
+        <button type="button" data-floor="E1" aria-label="Etage 1">E1</button>
+        <button type="button" data-floor="EG" aria-label="Erdgeschoss">EG</button>
+      </nav>
+      <p id="building-notice" role="status" aria-live="polite" hidden></p>
       <p id="game-status" class="game-status" role="status" aria-live="polite"></p>
 
       <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" aria-describedby="start-mission">
@@ -32,7 +39,7 @@
           <p id="start-subtitle" class="start-subtitle"></p>
           <p id="start-mission"></p>
           <ol class="start-steps">
-            <li>Laufen mit Klick oder WASD</li>
+            <li>Mit Klick oder WASD laufen und im Gebäude den Aufzug nutzen</li>
             <li>Kolleginnen und Kollegen anklicken &amp; Notizbuch füllen</li>
             <li>Abschluss-Check bei KIM</li>
           </ol>
@@ -41,6 +48,19 @@
             <button id="continue-game-btn" class="hidden" type="button" disabled hidden>Spielstand fortsetzen ▶</button>
           </div>
           <p id="start-status" role="status">Das Büro wird vorbereitet ...</p>
+        </div>
+      </section>
+
+      <section id="pause-screen" class="hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+        <div class="pause-card">
+          <p class="eyebrow">IT-Office-Adventure</p>
+          <h2 id="pause-title">Spiel pausiert</h2>
+          <div class="pause-actions">
+            <button id="resume-game-btn" type="button">Weiterspielen (ESC)</button>
+            <button id="pause-sound-btn" class="button-secondary" type="button" aria-pressed="true">🔊 Ton an</button>
+            <button id="return-to-building-btn" class="button-secondary" type="button" hidden>Zurück zum Fahrstuhl / Gebäude</button>
+            <button id="quit-to-menu-btn" class="button-secondary" type="button">Zurück zum Hauptmenü</button>
+          </div>
         </div>
       </section>
 
@@ -86,7 +106,7 @@
         </div>
       </section>
     </section>
-    <p class="help">Sprich mit den Kolleginnen und Kollegen und sammle ihre Rollen im Notizbuch. Danach wartet die Abschlussrunde auf dich.</p>
+    <p class="help">Wähle im Gebäude eine Etage oder eine Tür. Sprich im IT-Büro mit den Kolleginnen und Kollegen und sammle ihre Rollen im Notizbuch. Danach wartet die Abschlussrunde auf dich.</p>
     <noscript>Für dieses Spiel muss JavaScript aktiviert sein.</noscript>
   </main>
   <script src="./assets/phaser.min.js"></script>

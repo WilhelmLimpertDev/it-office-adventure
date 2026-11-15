@@ -272,7 +272,10 @@ export class GameScene extends Phaser.Scene {
         Phaser.Math.Clamp(pointer.worldY, 19, 581)
       );
     });
-    this.ui.enableStart();
+    this.ui.setCurrentScene("office");
+    this.ui.openBuilding = (floor) => this.scene.start("BuildingScene", { floor });
+    this.ui.stopMovement = () => this.stopMovement();
+    this.ui.resumeMovement = () => {};
   }
 
   addFurniture(item) {
@@ -437,15 +440,23 @@ export class GameScene extends Phaser.Scene {
     this.playerLabel.setPosition(this.player.x, this.player.y - this.player.displayHeight / 2 - 12);
   }
 
+  stopMovement() {
+    this.destination = null;
+    this.pendingTarget = null;
+    this.path = [];
+    this.pathBlocked = false;
+    this.player.body.setVelocity(0, 0);
+    if (this.hasTexture("player")) {
+      this.player.anims.stop();
+      this.player.setFrame(IDLE_FRAMES[this.playerDirection]);
+    }
+  }
+
   update(time) {
     this.updatePlayerMarkers();
     this.updateDepths();
     if (this.ui.isBlockingGame) {
-      this.destination = null;
-      this.pendingTarget = null;
-      this.path = [];
-      this.pathBlocked = false;
-      this.player.body.setVelocity(0);
+      this.stopMovement();
     } else {
       const x = Number(this.cursors.right.isDown || this.wasd.D.isDown) - Number(this.cursors.left.isDown || this.wasd.A.isDown);
       const y = Number(this.cursors.down.isDown || this.wasd.S.isDown) - Number(this.cursors.up.isDown || this.wasd.W.isDown);
@@ -497,7 +508,7 @@ export class GameScene extends Phaser.Scene {
     const moved = Phaser.Math.Distance.Between(
       this.player.x, this.player.y, this.lastPlayerPosition.x, this.lastPlayerPosition.y
     );
-    if (moved > 0.1 && this.player.body.speed > 5 && time - this.lastStepAt >= 280) {
+    if (!this.ui.isBlockingGame && moved > 0.1 && this.player.body.speed > 5 && time - this.lastStepAt >= 280) {
       soundManager.playStep();
       this.lastStepAt = time;
     }

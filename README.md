@@ -14,17 +14,22 @@ Anschließend `http://localhost:8000` im Browser öffnen. Das direkte Öffnen vo
 
 ## Spielen
 
-Im Startmenü „Büro betreten“ auswählen. Ein vorhandener Spielstand kann dort fortgesetzt oder mit „Neues Spiel starten“ gelöscht werden. Erst danach sind Bewegung und Gespräche im Büro aktiv.
+Im Startmenü „Büro betreten“ auswählen. Ein vorhandener Spielstand kann dort fortgesetzt oder mit „Neues Spiel starten“ gelöscht werden. Das Spiel beginnt jeweils im Erdgeschoss des Gebäudes.
+
+Im Gebäude läuft die Figur mit A/D, den Pfeiltasten oder einem Bodenklick auf ihrer Etage. Ein Klick auf eine Tür führt automatisch dorthin; bei Bedarf fährt der Aufzug zuerst auf die richtige Etage. Über das Aufzugspanel kann auch direkt eine Etage gewählt werden. Mit Enter öffnet sich die nächste Tür, wenn die Figur davor steht und das Spielfeld den Tastaturfokus hat. Die IT-Abteilung befindet sich auf E1; HR und Buchhaltung sind noch nicht spielbar. Während automatischer Wege und Aufzugfahrten sind weitere Ziele gesperrt.
+
+Mit ESC werden laufende Gespräche, das Notizbuch oder das Quiz geschlossen; unvollständige Gespräche und Quizversuche werden dabei abgebrochen. Im Gebäude und im Büro öffnet ESC das Pausenmenü. Laufwege und Aufzugfahrten werden dort angehalten und beim Fortsetzen weitergeführt. Im Büro kann man über das Pausenmenü auch zum Gebäude zurückkehren. Die Rückkehr zum Hauptmenü behält den gespeicherten Fortschritt.
 
 Mit einem Klick auf den Boden oder mit WASD beziehungsweise den Pfeiltasten bewegen. Ein Klick auf eine Person lässt die Spielfigur zu ihr laufen; manuelle Bewegung oder ein Bodenklick bricht den Weg ab. Ein Bodenring markiert die Person unter dem Mauszeiger. Beim Gesprächsbeginn blickt sie zur Spielfigur. Dialogtexte erscheinen Zeichen für Zeichen: Ein Klick auf die Antwort- oder Weiter-Schaltfläche zeigt den Text sofort vollständig, der nächste setzt das Gespräch fort. Rollen nach abgeschlossenen Gesprächen im Notizbuch nachlesen; nach drei Gesprächen schaltet die Projektleitung das Quiz frei. Die Auswertung zeigt alle Antworten und erlaubt, das Quiz zu wiederholen oder das Notizbuch zu öffnen. Gehälter sind illustrative Brutto-Jahreswerte und variieren beispielsweise nach Region und Erfahrung.
 
 Freigeschaltete Rollen sowie Abschluss und Punktzahl des zuletzt abgeschlossenen Quiz werden automatisch im `localStorage` des Browsers gespeichert. Der Spielstand ist an Browser und Serveradresse gebunden und kann beim Löschen der Browserdaten verloren gehen. Spielfigurposition und laufende Gespräche oder Quizfragen werden nicht gespeichert. Wenn der Browser die Speicherung blockiert, erscheint ein entsprechender Hinweis.
 
-Die Schritt-, Sprach- und Erfolgstöne werden lokal mit der Web Audio API erzeugt und nach der ersten Interaktion aktiviert. Über „Ton an/aus“ im HUD lassen sie sich stummschalten. Die Stimmlage der Personen kann über `voicePitch` in den Spieldaten angepasst werden.
+Die Schritt-, Sprach-, Aufzug-, Tür- und Erfolgstöne werden lokal mit der Web Audio API erzeugt und nach der ersten Interaktion aktiviert. Über „Ton an/aus“ im HUD oder Pausenmenü lassen sie sich stummschalten. Die Gesamtlautstärke kann über `soundManager.masterVolume` zwischen `0` und `1` gesetzt werden; die Stimmlage der Personen über `voicePitch` in den Spieldaten.
 
 ## Aufbau
 
 - `data/officeData.json`: Rollen, Gespräche und Quizfragen.
+- `js/buildingScene.js`: Gebäude, Aufzug und Etagenwahl.
 - `js/gameScene.js`: Darstellung und Steuerung des Büros.
 - `js/uiManager.js`: Dialoge, Notizbuch, Fortschritt und Quiz.
 - `js/soundManager.js`: prozedurale Soundeffekte und Stummschaltung.

@@ -10,7 +10,10 @@ async function startGame() {
     if (!window.Phaser) {
       throw new Error("Die lokale Phaser-Datei ./assets/phaser.min.js konnte nicht geladen werden.");
     }
-    const { GameScene } = await import("./gameScene.js");
+    const [{ BuildingScene }, { GameScene }] = await Promise.all([
+      import("./buildingScene.js"),
+      import("./gameScene.js")
+    ]);
 
     document.title = data.meta.title;
     document.getElementById("game-title").textContent = data.meta.title;
@@ -24,7 +27,7 @@ async function startGame() {
       backgroundColor: "#1e293b",
       scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
       physics: { default: "arcade", arcade: { gravity: { x: 0, y: 0 }, debug: false } },
-      scene: new GameScene(data, ui)
+      scene: [new BuildingScene(ui), new GameScene(data, ui)]
     });
   } catch (error) {
     console.error("Spielstart fehlgeschlagen:", error);
