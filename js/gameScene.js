@@ -272,6 +272,7 @@ export class GameScene extends Phaser.Scene {
         Phaser.Math.Clamp(pointer.worldY, 19, 581)
       );
     });
+    this.ui.enableStart();
   }
 
   addFurniture(item) {

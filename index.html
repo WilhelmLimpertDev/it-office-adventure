@@ -15,8 +15,8 @@
     </header>
 
     <section id="game-container" aria-label="Interaktives IT-Büro">
-      <div id="game-canvas"></div>
-      <div class="hud">
+      <div id="game-canvas" tabindex="-1" inert></div>
+      <div class="hud" inert>
         <span class="hud-hint">Klicken oder WASD / Pfeiltasten</span>
         <div class="hud-actions">
           <button id="sound-toggle" class="button-secondary" type="button" aria-pressed="true">🔊 Ton an</button>
@@ -24,6 +24,25 @@
         </div>
       </div>
       <p id="game-status" class="game-status" role="status" aria-live="polite"></p>
+
+      <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" aria-describedby="start-mission">
+        <div class="start-card">
+          <p class="eyebrow">Willkommen im Team</p>
+          <h2 id="start-title">IT-Karriere-Kompass</h2>
+          <p id="start-subtitle" class="start-subtitle"></p>
+          <p id="start-mission"></p>
+          <ol class="start-steps">
+            <li>Laufen mit Klick oder WASD</li>
+            <li>Kolleginnen und Kollegen anklicken &amp; Notizbuch füllen</li>
+            <li>Abschluss-Check bei KIM</li>
+          </ol>
+          <div class="start-actions">
+            <button id="start-game-btn" type="button" disabled>Büro betreten ▶</button>
+            <button id="continue-game-btn" class="hidden" type="button" disabled hidden>Spielstand fortsetzen ▶</button>
+          </div>
+          <p id="start-status" role="status">Das Büro wird vorbereitet ...</p>
+        </div>
+      </section>
 
       <section id="dialogue-overlay" class="panel dialogue" aria-label="Gespräch" hidden>
         <p id="dialogue-speaker" class="eyebrow"></p>
@@ -48,7 +67,22 @@
             <div><p class="eyebrow">Abschlussrunde</p><h2 id="quiz-title">Das Praxis-Quiz</h2></div>
             <button id="quiz-close" class="button-secondary" type="button">Schließen</button>
           </div>
+          <p id="quiz-storage-status" class="storage-warning" role="status"></p>
           <div id="quiz-body" aria-live="polite"></div>
+          <section id="quiz-result-screen" class="hidden" aria-labelledby="quiz-result-title" hidden>
+            <h3 id="quiz-result-title" tabindex="-1">Auswertung: Praxis-Check bei KIM</h3>
+            <div class="result-badge">
+              <p id="quiz-result-score"></p>
+              <p id="quiz-result-rank"></p>
+            </div>
+            <h4>Deine Antworten</h4>
+            <ol id="quiz-result-answers" class="result-answers"></ol>
+            <div class="actions result-actions">
+              <button id="quiz-retry" type="button">Quiz wiederholen</button>
+              <button id="quiz-notebook" class="button-secondary" type="button">Notizbuch öffnen</button>
+              <button id="quiz-return" class="button-secondary" type="button">Zurück ins Büro</button>
+            </div>
+          </section>
         </div>
       </section>
     </section>

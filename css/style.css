@@ -27,8 +27,24 @@ button:focus-visible { outline: 3px solid #facc15; outline-offset: 3px; }
 .hud button { pointer-events: auto; }
 button { border: 1px solid transparent; border-radius: 8px; padding: 9px 14px; color: #082f49; background: #67e8f9; font-weight: 700; cursor: pointer; }
 button:hover { background: #a5f3fc; }
+button:disabled { opacity: .6; cursor: wait; }
 .button-secondary { border-color: #64748b; color: #e2e8f0; background: #334155; }
 .button-secondary:hover { background: #475569; }
+#start-screen { position: absolute; z-index: 10; inset: 0; display: flex; padding: 20px; background: #020617b8; backdrop-filter: blur(4px); opacity: 1; transition: opacity .28s ease; }
+#start-screen.hidden { opacity: 0; pointer-events: none; }
+.start-card { width: min(100%, 550px); max-height: 100%; margin: auto; overflow-y: auto; padding: clamp(20px, 4vw, 36px); border: 1px solid #557089; border-radius: 18px; background: #0f172af2; box-shadow: 0 24px 70px #020617b3; opacity: 1; transform: translateY(0); transition: opacity .28s ease, transform .28s ease; }
+.start-card.hidden { opacity: 0; transform: translateY(12px); }
+.start-card h2 { margin: 0; color: #f8fafc; font-size: clamp(1.5rem, 4vw, 2rem); line-height: 1.15; }
+.start-subtitle { margin: 8px 0 18px; color: #67e8f9; font-weight: 600; }
+#start-mission { color: #cbd5e1; }
+.start-steps { display: grid; gap: 6px; margin: 20px 0; padding-left: 24px; color: #cbd5e1; }
+.start-steps li::marker { color: #67e8f9; font-weight: 700; }
+.start-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.start-actions button { max-width: 100%; padding: 12px 20px; }
+#continue-game-btn:not([hidden]), #start-game-btn:not(.button-secondary) { box-shadow: 0 8px 24px #0891b233; }
+#continue-game-btn.hidden, #quiz-result-screen.hidden { display: none; }
+#start-status { margin: 10px 0 0; color: #aab9cd; font-size: .85rem; }
+#start-status:empty { display: none; }
 .game-status { position: absolute; z-index: 2; right: 14px; bottom: 14px; max-width: min(400px, 85%); margin: 0; padding: 8px 12px; border-radius: 8px; color: #f8fafc; background: #0f172aee; pointer-events: none; }
 .game-status:empty { display: none; }
 .panel { border: 1px solid #475569; border-radius: 12px; background: #0f172af5; box-shadow: 0 12px 30px #02061799; }
@@ -46,6 +62,16 @@ button:hover { background: #a5f3fc; }
 .quiz-options { display: grid; gap: 8px; margin: 16px 0; }
 .quiz-options button { text-align: left; }
 .feedback { padding: 12px; border-left: 4px solid #67e8f9; background: #1e293b; }
+.storage-warning { color: #fbbf24; }
+.storage-warning:empty { display: none; }
+.result-badge { padding: 16px; border: 1px solid #0e7490; border-radius: 12px; background: #164e634d; text-align: center; }
+#quiz-result-score { margin: 0; color: #a5f3fc; font-size: 1.5rem; font-weight: 800; }
+#quiz-result-rank { margin: 4px 0 0; font-weight: 700; }
+.result-answers { display: grid; gap: 8px; padding: 0; list-style: none; }
+.result-answers li { padding: 10px 12px; border-left: 3px solid #4ade80; border-radius: 6px; background: #1e293b; }
+.result-answers li.incorrect { border-color: #fb7185; }
+.result-answers p { margin: 4px 0 0; color: #cbd5e1; }
+.result-actions { margin-top: 18px; }
 .help { font-size: .9rem; }
 @media (max-width: 560px) {
   .page { width: min(100% - 16px, 800px); margin-top: 16px; }
@@ -54,4 +80,11 @@ button:hover { background: #a5f3fc; }
   .dialogue { right: 8px; bottom: 8px; left: 8px; max-height: 70%; overflow-y: auto; padding: 12px; }
   .modal { padding: 8px; }
   .modal-content { padding: 14px; }
+  #start-screen { position: fixed; padding: 16px; }
+  .start-card { padding: 16px; }
+  .start-subtitle { margin-bottom: 10px; }
+  .start-steps { gap: 2px; margin: 10px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #start-screen, .start-card { transition: none; }
 }

@@ -1,6 +1,8 @@
 {
   "meta": {
     "title": "IT-Karriere-Kompass",
+    "subtitle": "Entdecke IT-Berufe im Praxis-Alltag",
+    "missionText": "Laufe durch das Büro, sprich mit deinen neuen Kolleginnen und Kollegen über ihre Aufgaben, Voraussetzungen und Gehälter – und stelle dich am Ende dem Praxis-Check bei KIM!",
     "welcomeText": "Willkommen im IT-Büro! Entdecke drei Berufsbilder und löse anschließend die Praxisfälle der Projektleitung."
   },
   "npcs": [

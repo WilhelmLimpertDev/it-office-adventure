@@ -30,6 +30,8 @@ async function startGame() {
     console.error("Spielstart fehlgeschlagen:", error);
     document.getElementById("welcome-text").textContent =
       `Das Spiel konnte nicht gestartet werden: ${error.message} Starte es über einen lokalen HTTP-Server.`;
+    document.getElementById("start-status").textContent =
+      `Das Spiel konnte nicht gestartet werden: ${error.message} Starte es über einen lokalen HTTP-Server.`;
   }
 }
 

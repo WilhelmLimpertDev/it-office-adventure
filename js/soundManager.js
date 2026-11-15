@@ -11,13 +11,13 @@ export class SoundManager {
   }
 
   unlock() {
-    if (this.unavailable) return;
+    if (this.unavailable) return Promise.resolve();
     if (!this.context) {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!AudioContext) {
         console.warn("Web Audio wird von diesem Browser nicht unterstützt.");
         this.unavailable = true;
-        return;
+        return Promise.resolve();
       }
       try {
         this.context = new AudioContext();
@@ -27,12 +27,13 @@ export class SoundManager {
       } catch (error) {
         console.error("AudioContext konnte nicht erstellt werden:", error);
         this.unavailable = true;
-        return;
+        return Promise.resolve();
       }
     }
     if (this.context.state === "suspended") {
-      this.context.resume().catch((error) => console.error("AudioContext konnte nicht fortgesetzt werden:", error));
+      return this.context.resume().catch((error) => console.error("AudioContext konnte nicht fortgesetzt werden:", error));
     }
+    return Promise.resolve();
   }
 
   toggleMute() {
@@ -71,9 +72,15 @@ export class SoundManager {
     this.playTone(pitch + Math.random() * 50 - 25, 0.035, 0.012, "sine");
   }
 
-  playCollect() {
-    this.playTone(523.25, 0.12, 0.025, "sine");
-    this.playTone(659.25, 0.18, 0.025, "sine", 0.12);
+  playCollect(pitchScale = 1, delay = 0) {
+    this.playTone(523.25 * pitchScale, 0.12, 0.025, "sine", delay);
+    this.playTone(659.25 * pitchScale, 0.18, 0.025, "sine", delay + 0.12);
+  }
+
+  playVictory() {
+    this.playCollect(1, 0);
+    this.playCollect(1.12246, 0.25);
+    this.playCollect(1.25992, 0.5);
   }
 }
 
