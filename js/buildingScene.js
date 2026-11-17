@@ -2,6 +2,9 @@ import { soundManager } from "./soundManager.js";
 
 const FLOORS = { EG: 500, E1: 340, E2: 180 };
 const LIFT_X = 178;
+const CALL_LAMP_OFF = 0x475569;
+const CALL_LAMP_CALLING = 0xfb923c;
+const CALL_LAMP_READY = 0x4ade80;
 const DOORS = [
   { floor: "E1", x: 425, label: "IT-Abteilung", kind: "it" },
   { floor: "E1", x: 625, label: "Human Resource (HR)", kind: "locked" },
@@ -13,6 +16,7 @@ export class BuildingScene extends Phaser.Scene {
   constructor(ui) {
     super({ key: "BuildingScene" });
     this.ui = ui;
+    this.lastToiletMsgIndex = -1;
   }
 
   init(data) {
@@ -24,6 +28,10 @@ export class BuildingScene extends Phaser.Scene {
     this.liftTween = null;
     this.stopHum = null;
     this.lastStepAt = -Infinity;
+    this.isPlayerInElevator = false;
+    this.liftFloor = this.floor;
+    this.callLamps = {};
+    this.panelButtons = {};
   }
 
   preload() {
@@ -63,12 +71,11 @@ export class BuildingScene extends Phaser.Scene {
       if (Math.abs(pointer.worldY - FLOORS[this.floor]) > 75) return;
       document.getElementById("game-canvas").focus({ preventScroll: true });
       this.ui.hideBuildingNotice();
+      this.setInElevator(false);
       this.setBusy(true);
-      this.walkTo(Phaser.Math.Clamp(pointer.worldX, 100, 710), () => this.setBusy(false));
+      this.walkTo(Phaser.Math.Clamp(pointer.worldX, this.minX(), 710), () => this.setBusy(false));
     });
     this.ui.setCurrentScene("building");
-    this.ui.setElevatorState(this.floor, false);
-    this.ui.requestFloor = (floor) => this.selectFloor(floor);
     this.ui.openBuilding = (floor) => this.scene.restart({ floor });
     this.ui.stopMovement = () => this.pauseMovement();
     this.ui.resumeMovement = () => this.resumeMovement();
@@ -101,7 +108,7 @@ export class BuildingScene extends Phaser.Scene {
     g.fillStyle(0x101e2b).fillRect(120, 69, 116, 457);
     g.lineStyle(3, 0x617b89).strokeRect(120, 69, 116, 457);
     g.lineStyle(1, 0x304958).lineBetween(130, 73, 130, 525).lineBetween(226, 73, 226, 525);
-    this.add.text(400, 22, "KARRIERE-HUB", {
+    this.add.text(400, 22, "BÜRO-GEBÄUDE", {
       fontFamily: "sans-serif", fontSize: "14px", fontStyle: "bold", color: "#cffafe"
     }).setOrigin(0.5);
 
@@ -160,25 +167,133 @@ export class BuildingScene extends Phaser.Scene {
     g.fillStyle(0xd5b98c).fillRect(-42, 18, 84, 8);
     g.fillStyle(0x67e8f9).fillCircle(32, -88, 3);
     this.lift.add(g);
+    this.createElevatorPanel();
+    Object.keys(FLOORS).forEach((floor) => this.createCallButton(floor));
+  }
+
+  createCallButton(floor) {
+    const x = 254;
+    const y = FLOORS[floor] - 45;
+    const g = this.add.graphics();
+    g.fillStyle(0x0f1d29).fillRoundedRect(x - 10, y - 17, 20, 34, 4);
+    g.lineStyle(1, 0x7f98a5).strokeRoundedRect(x - 10, y - 17, 20, 34, 4);
+    this.add.text(x, y - 9, "▲▼", { fontFamily: "sans-serif", fontSize: "7px", color: "#94a3b8" }).setOrigin(0.5);
+    const lamp = this.add.circle(x, y + 6, 6, CALL_LAMP_OFF).setStrokeStyle(2, 0xcbd5e1);
+    lamp.setInteractive({ useHandCursor: true });
+    lamp.on("pointerdown", () => {
+      document.getElementById("game-canvas").focus({ preventScroll: true });
+      this.callLift(floor);
+    });
+    this.callLamps[floor] = lamp;
+  }
+
+  createElevatorPanel() {
+    this.elevatorPanel = this.add.container(LIFT_X, FLOORS[this.floor]).setDepth(11).setVisible(false);
+    const frame = this.add.graphics();
+    frame.fillStyle(0x0f1d29).fillRoundedRect(15, -94, 28, 70, 4);
+    frame.lineStyle(1, 0x7f98a5).strokeRoundedRect(15, -94, 28, 70, 4);
+    this.elevatorPanel.add(frame);
+    ["E2", "E1", "EG"].forEach((floor, i) => {
+      const button = this.add.rectangle(29, -81 + i * 21, 22, 17, 0x334155).setStrokeStyle(1, 0x94a3b8);
+      const label = this.add.text(29, -81 + i * 21, floor, {
+        fontFamily: "sans-serif", fontSize: "10px", fontStyle: "bold", color: "#e2e8f0"
+      }).setOrigin(0.5);
+      button.setInteractive({ useHandCursor: true });
+      button.on("pointerdown", () => {
+        document.getElementById("game-canvas").focus({ preventScroll: true });
+        this.selectFloor(floor);
+      });
+      this.elevatorPanel.add([button, label]);
+      this.panelButtons[floor] = { button, label };
+    });
+    this.refreshPanel();
+  }
+
+  refreshPanel() {
+    Object.entries(this.panelButtons).forEach(([floor, { button, label }]) => {
+      const active = floor === this.liftFloor;
+      button.setFillStyle(active ? 0x67e8f9 : 0x334155);
+      label.setColor(active ? "#082f49" : "#e2e8f0");
+    });
+  }
+
+  setInElevator(value) {
+    this.isPlayerInElevator = value;
+    this.elevatorPanel.setVisible(value);
+  }
+
+  minX() {
+    return this.liftFloor === this.floor ? 100 : 245;
+  }
+
+  flashLamp(floor, color) {
+    this.callLamps[floor].setFillStyle(color);
+    this.time.delayedCall(700, () => this.callLamps[floor]?.setFillStyle(CALL_LAMP_OFF));
+  }
+
+  callLift(floor) {
+    if (this.ui.isBlockingGame || this.busy || this.isPlayerInElevator || floor !== this.floor) return;
+    this.ui.hideBuildingNotice();
+    this.setBusy(true);
+    const enter = () => this.walkTo(LIFT_X, () => {
+      this.setInElevator(true);
+      this.setBusy(false);
+    });
+    if (this.liftFloor === floor) {
+      this.flashLamp(floor, CALL_LAMP_READY);
+      enter();
+      return;
+    }
+    this.callLamps[floor].setFillStyle(CALL_LAMP_CALLING);
+    this.moveLift(floor, false, () => {
+      this.flashLamp(floor, CALL_LAMP_READY);
+      enter();
+    });
+  }
+
+  moveLift(floor, withPlayer, onArrival) {
+    this.stopHum = soundManager.startElevatorHum();
+    this.liftTween = this.tweens.add({
+      targets: withPlayer ? [this.lift, this.player] : [this.lift],
+      y: FLOORS[floor],
+      duration: Math.abs(FLOORS[floor] - FLOORS[this.liftFloor]) * 7,
+      ease: "Sine.easeInOut",
+      onUpdate: () => this.elevatorPanel.setY(this.lift.y),
+      onComplete: () => {
+        this.liftTween = null;
+        this.stopElevatorHum();
+        this.liftFloor = floor;
+        if (withPlayer) this.floor = floor;
+        this.elevatorPanel.setY(this.lift.y);
+        this.refreshPanel();
+        soundManager.playElevatorBell();
+        onArrival();
+      }
+    });
   }
 
   setBusy(busy) {
     this.busy = busy;
-    this.ui.setElevatorState(this.floor, busy);
   }
 
   selectFloor(floor) {
-    if (this.ui.isBlockingGame || this.busy || !Object.hasOwn(FLOORS, floor)) return;
+    if (this.ui.isBlockingGame || this.busy || !this.isPlayerInElevator || !Object.hasOwn(FLOORS, floor)) return;
+    if (floor === this.liftFloor) return;
     this.ui.hideBuildingNotice();
     this.setBusy(true);
-    this.travelToFloor(floor, () => this.setBusy(false));
+    this.moveLift(floor, true, () => this.setBusy(false));
   }
 
   selectDoor(door) {
     if (this.ui.isBlockingGame || this.busy) return;
     this.ui.hideBuildingNotice();
+    if (door.floor !== this.floor) {
+      this.ui.showBuildingNotice("Nimm den Fahrstuhl: Rufknopf drücken und die Etage im Fahrstuhl wählen.");
+      return;
+    }
+    this.setInElevator(false);
     this.setBusy(true);
-    const approach = () => this.walkTo(door.x, () => {
+    this.walkTo(door.x, () => {
       this.setBusy(false);
       if (door.kind === "it") {
         soundManager.playDoor();
@@ -188,35 +303,21 @@ export class BuildingScene extends Phaser.Scene {
         this.ui.showBuildingNotice("Diese Level sind in dieser Test-Version noch nicht spielbar!");
       } else {
         soundManager.playToilet();
-        this.ui.showBuildingNotice("Wegen Verstopfung geschlossen! Der Hausmeister wurde bereits informiert.");
+        this.ui.showBuildingNotice(this.pickToiletMessage(), { portrait: "player", speaker: "Du" });
       }
     });
-    if (door.floor === this.floor) approach();
-    else this.travelToFloor(door.floor, approach);
   }
 
-  travelToFloor(floor, onArrival) {
-    this.walkTo(LIFT_X, () => {
-      if (floor === this.floor) {
-        onArrival();
-        return;
-      }
-      this.stopHum = soundManager.startElevatorHum();
-      this.liftTween = this.tweens.add({
-        targets: [this.lift, this.player],
-        y: FLOORS[floor],
-        duration: Math.abs(FLOORS[floor] - FLOORS[this.floor]) * 7,
-        ease: "Sine.easeInOut",
-        onComplete: () => {
-          this.liftTween = null;
-          this.stopElevatorHum();
-          this.floor = floor;
-          this.ui.setElevatorState(this.floor, this.busy);
-          soundManager.playElevatorBell();
-          onArrival();
-        }
-      });
-    });
+  pickToiletMessage() {
+    const fallback = "Wegen Verstopfung geschlossen! Der Hausmeister wurde bereits informiert.";
+    const loaded = this.ui.data?.toiletMessages;
+    const messages = Array.isArray(loaded) && loaded.length ? loaded : [fallback];
+    let index = Math.floor(Math.random() * messages.length);
+    if (messages.length > 1 && index === this.lastToiletMsgIndex) {
+      index = (index + 1 + Math.floor(Math.random() * (messages.length - 1))) % messages.length;
+    }
+    this.lastToiletMsgIndex = index;
+    return messages[index];
   }
 
   walkTo(x, onArrival) {
@@ -282,7 +383,8 @@ export class BuildingScene extends Phaser.Scene {
         Number(this.cursors.left.isDown || this.wasd.A.isDown);
       if (direction) {
         this.ui.hideBuildingNotice();
-        this.player.x = Phaser.Math.Clamp(this.player.x + direction * delta * 0.18, 100, 710);
+        this.setInElevator(false);
+        this.player.x = Phaser.Math.Clamp(this.player.x + direction * delta * 0.18, this.minX(), 710);
         this.setWalking(direction < 0 ? "left" : "right");
       } else if (this.walking) {
         this.setIdle();

@@ -34,8 +34,9 @@ export class UIManager {
     this.quizStorageStatus = document.getElementById("quiz-storage-status");
     this.quizBody = document.getElementById("quiz-body");
     this.quizResult = document.getElementById("quiz-result-screen");
-    this.elevatorControls = document.getElementById("elevator-controls");
     this.buildingNotice = document.getElementById("building-notice");
+    this.buildingNoticeText = document.getElementById("building-notice-text");
+    this.buildingNoticePortrait = document.getElementById("building-notice-portrait");
     this.returnToBuildingButton = document.getElementById("return-to-building-btn");
     this.currentScene = "building";
     document.getElementById("start-title").textContent = data.meta.title;
@@ -53,14 +54,6 @@ export class UIManager {
     document.getElementById("resume-game-btn").addEventListener("click", () => this.togglePause(false));
     document.getElementById("quit-to-menu-btn").addEventListener("click", () => this.returnToMenu());
     this.returnToBuildingButton.addEventListener("click", () => this.returnToBuilding());
-    this.elevatorControls.querySelectorAll("button[data-floor]").forEach((button) => {
-      button.addEventListener("click", () => {
-        if (!this.isBlockingGame && this.currentScene === "building") {
-          this.requestFloor(button.dataset.floor);
-          document.getElementById("game-canvas").focus({ preventScroll: true });
-        }
-      });
-    });
     document.getElementById("notebook-close").addEventListener("click", () => this.toggleNotebook(false));
     document.getElementById("quiz-close").addEventListener("click", () => this.closeQuiz());
     document.getElementById("quiz-retry").addEventListener("click", () => {
@@ -153,7 +146,7 @@ export class UIManager {
     this.continueButton.hidden = !hasProgress;
     this.continueButton.classList.toggle("hidden", !hasProgress);
     this.continueButton.textContent = `Spielstand fortsetzen (${this.unlockedRoles.size}/${this.data.npcs.length} Rollen) ▶`;
-    this.startButton.textContent = hasProgress ? "Neues Spiel starten" : "Büro betreten ▶";
+    this.startButton.textContent = hasProgress ? "Neues Spiel starten" : "Gebäude betreten ▶";
     this.startButton.classList.toggle("button-secondary", hasProgress);
   }
 
@@ -166,8 +159,6 @@ export class UIManager {
     const building = scene === "building";
     document.getElementById("game-container").classList.toggle("building", building);
     this.notebookButton.hidden = building;
-    this.elevatorControls.hidden = !building;
-    this.elevatorControls.inert = !this.isGameStarted || this.isPaused;
     this.returnToBuildingButton.hidden = building;
     document.getElementById("hud-hint").textContent = building
       ? "A/D oder klicken · Enter an Türen"
@@ -176,22 +167,18 @@ export class UIManager {
     this.hideBuildingNotice();
   }
 
-  setElevatorState(floor, busy) {
-    this.elevatorControls.setAttribute("aria-busy", String(busy));
-    this.elevatorControls.querySelectorAll("button[data-floor]").forEach((button) => {
-      button.disabled = busy;
-      button.setAttribute("aria-pressed", String(button.dataset.floor === floor));
-    });
-  }
-
-  showBuildingNotice(message) {
-    this.buildingNotice.textContent = message;
+  showBuildingNotice(message, { portrait = null, speaker = "" } = {}) {
+    this.buildingNoticeText.textContent = speaker ? `${speaker}: ${message}` : message;
+    this.buildingNoticePortrait.hidden = !portrait;
+    if (portrait) {
+      this.drawPortrait(this.buildingNoticePortrait, portrait, () => !this.buildingNotice.hidden);
+    }
     this.buildingNotice.hidden = false;
   }
 
   hideBuildingNotice() {
     this.buildingNotice.hidden = true;
-    this.buildingNotice.textContent = "";
+    this.buildingNoticeText.textContent = "";
   }
 
   toggleSound() {
@@ -212,7 +199,6 @@ export class UIManager {
     const canvas = document.getElementById("game-canvas");
     canvas.inert = paused;
     document.querySelector(".hud").inert = paused;
-    this.elevatorControls.inert = paused;
     if (paused) document.getElementById("resume-game-btn").focus({ preventScroll: true });
     else {
       this.resumeMovement();
@@ -266,7 +252,6 @@ export class UIManager {
     const canvas = document.getElementById("game-canvas");
     canvas.inert = false;
     document.querySelector(".hud").inert = false;
-    this.elevatorControls.inert = false;
     canvas.focus({ preventScroll: true });
     this.startScreen.inert = true;
     this.startScreen.setAttribute("aria-hidden", "true");
@@ -286,12 +271,36 @@ export class UIManager {
     this.activeNpc = npc;
     this.dialogueIndex = 0;
     this.dialogue.hidden = false;
+    this.renderNpcPortrait(npc);
     this.renderDialogue();
+  }
+
+  renderNpcPortrait(npc) {
+    this.drawPortrait(document.getElementById("dialogue-portrait"), npc.sprite, () => this.activeNpc === npc);
+  }
+
+  drawPortrait(canvas, spriteKey, isCurrent = () => true) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = false;
+    const image = new Image();
+    image.onload = () => {
+      if (!isCurrent()) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Frame 130 = nach vorne blickende Idle-Pose (Spalte 0, Zeile 10) des 13-spaltigen LPC-Sheets
+      ctx.drawImage(image, 14, 10 * 64 + 8, 36, 36, 0, 0, canvas.width, canvas.height);
+    };
+    image.src = `./assets/images/${spriteKey}.png`;
+  }
+
+  setPortraitTalking(talking) {
+    document.getElementById("dialogue-portrait").classList.toggle("portrait-talking", talking);
   }
 
   closeDialogue() {
     clearInterval(this.typewriterTimer);
     this.typewriterTimer = null;
+    this.setPortraitTalking(false);
     this.activeNpc = null;
     this.dialogue.hidden = true;
     document.getElementById("game-canvas").focus({ preventScroll: true });
@@ -309,6 +318,7 @@ export class UIManager {
     let index = 0;
     let visibleCharacters = 0;
     if (characters.length) {
+      this.setPortraitTalking(true);
       this.typewriterTimer = setInterval(() => {
         const character = characters[index++];
         text.textContent += character;
@@ -318,6 +328,7 @@ export class UIManager {
         if (index === characters.length) {
           clearInterval(this.typewriterTimer);
           this.typewriterTimer = null;
+          this.setPortraitTalking(false);
         }
       }, 28);
     }
@@ -327,6 +338,7 @@ export class UIManager {
       if (this.typewriterTimer !== null) {
         clearInterval(this.typewriterTimer);
         this.typewriterTimer = null;
+        this.setPortraitTalking(false);
         text.textContent = step.text;
         return;
       }

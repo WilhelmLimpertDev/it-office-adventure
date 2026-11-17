@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>IT-Karriere-Kompass</title>
+  <title>IT-Office Adventure</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
   <main class="page">
     <header class="page-header">
       <p class="eyebrow">IT-Office-Adventure</p>
-      <h1 id="game-title">IT-Karriere-Kompass</h1>
+      <h1 id="game-title">IT-Office Adventure</h1>
       <p id="welcome-text">Das Büro wird vorbereitet ...</p>
     </header>
 
@@ -23,19 +23,16 @@
           <button id="notebook-button" type="button" aria-controls="notebook-overlay" aria-expanded="false">Notizbuch (0/3)</button>
         </div>
       </div>
-      <nav id="elevator-controls" aria-label="Fahrstuhlsteuerung" hidden inert>
-        <span>Aufzug</span>
-        <button type="button" data-floor="E2" aria-label="Etage 2">E2</button>
-        <button type="button" data-floor="E1" aria-label="Etage 1">E1</button>
-        <button type="button" data-floor="EG" aria-label="Erdgeschoss">EG</button>
-      </nav>
-      <p id="building-notice" role="status" aria-live="polite" hidden></p>
+      <div id="building-notice" role="status" aria-live="polite" hidden>
+        <canvas id="building-notice-portrait" width="72" height="72" aria-hidden="true" hidden></canvas>
+        <span id="building-notice-text"></span>
+      </div>
       <p id="game-status" class="game-status" role="status" aria-live="polite"></p>
 
       <section id="start-screen" role="dialog" aria-modal="true" aria-labelledby="start-title" aria-describedby="start-mission">
         <div class="start-card">
           <p class="eyebrow">Willkommen im Team</p>
-          <h2 id="start-title">IT-Karriere-Kompass</h2>
+          <h2 id="start-title">IT-Office Adventure</h2>
           <p id="start-subtitle" class="start-subtitle"></p>
           <p id="start-mission"></p>
           <ol class="start-steps">
@@ -44,7 +41,7 @@
             <li>Abschluss-Check bei KIM</li>
           </ol>
           <div class="start-actions">
-            <button id="start-game-btn" type="button" disabled>Büro betreten ▶</button>
+            <button id="start-game-btn" type="button" disabled>Gebäude betreten ▶</button>
             <button id="continue-game-btn" class="hidden" type="button" disabled hidden>Spielstand fortsetzen ▶</button>
           </div>
           <p id="start-status" role="status">Das Büro wird vorbereitet ...</p>
@@ -65,10 +62,15 @@
       </section>
 
       <section id="dialogue-overlay" class="panel dialogue" aria-label="Gespräch" hidden>
-        <p id="dialogue-speaker" class="eyebrow"></p>
-        <p id="dialogue-text" aria-hidden="true"></p>
-        <p id="dialogue-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></p>
-        <div id="dialogue-actions" class="actions"></div>
+        <div class="dialogue-layout">
+          <canvas id="dialogue-portrait" width="72" height="72" aria-hidden="true"></canvas>
+          <div class="dialogue-body">
+            <p id="dialogue-speaker" class="eyebrow"></p>
+            <p id="dialogue-text" aria-hidden="true"></p>
+            <p id="dialogue-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+            <div id="dialogue-actions" class="actions"></div>
+          </div>
+        </div>
       </section>
 
       <section id="notebook-overlay" class="modal" role="dialog" aria-modal="true" aria-labelledby="notebook-title" hidden>

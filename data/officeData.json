@@ -1,10 +1,22 @@
 {
   "meta": {
-    "title": "IT-Karriere-Kompass",
-    "subtitle": "Entdecke IT-Berufe im Praxis-Alltag",
+    "title": "IT-Office Adventure",
+    "subtitle": "Level 5: IT-Büro • Quest 1: IT-Karriere Kompass",
     "missionText": "Laufe durch das Büro, sprich mit deinen neuen Kolleginnen und Kollegen über ihre Aufgaben, Voraussetzungen und Gehälter – und stelle dich am Ende dem Praxis-Check bei KIM!",
     "welcomeText": "Willkommen im IT-Büro! Entdecke drei Berufsbilder und löse anschließend die Praxisfälle der Projektleitung."
   },
+  "toiletMessages": [
+    "Wegen Verstopfung geschlossen! Der Hausmeister wurde bereits informiert.",
+    "Zugriff verweigert (Error 403)! Ich habe wohl nicht die nötigen Admin-Rechte für diesen Bereich.",
+    "Na toll, die Tür ist geblockt. Ich habe hier ein akutes Pufferüberlauf-Problem und muss dringend meinen Cache leeren!",
+    "Die Session ist geschlossen. Wenn der Sysadmin nicht bald den Port freigibt, mache ich gleich einen unkontrollierten Core Dump in den Flur.",
+    "Ich habe doch gerade erst den großen Kaffee-Download abgeschlossen! Warum ist die Firewall genau jetzt aktiv?!",
+    "Typisch IT: Der Serverraum hat redundante Kühlung, aber für die menschliche Hardware gibt es kein einziges Failover-Klo!",
+    "Besetzt?! Wer bitte kompiliert denn da drin gerade seinen Quellcode? Das dauert ja länger als ein Windows-Update!",
+    "Ich brauche dringend einen Reset, sonst stürzt mein System hier gleich mit einem kritischen Bluescreen ab.",
+    "Das verstößt eindeutig gegen unsere SLA-Vereinbarungen. Meine Reaktionszeit beträgt hier maximal noch zwei Minuten!",
+    "Abgeschlossen? Muss ich jetzt wirklich erst ein Ticket beim Facility Management aufmachen, bevor die Pipeline hier platzt?!"
+  ],
   "npcs": [
     {
       "id": "junior_dev",
